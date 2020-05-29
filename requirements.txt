@@ -1,0 +1,8 @@
+google-cloud-bigquery==1.24.0
+numpy==1.18.4
+pandas==1.0.4
+scikit-learn==0.23.1
+scipy==1.4.1
+# Editable install with no version control (target-market-advait==0.1)
+# Custom lightweight python package for project configuration files
+-e c:\users\advai\insight\target_and_market
