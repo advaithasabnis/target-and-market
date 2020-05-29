@@ -23,9 +23,7 @@
 <!-- CONTENTS -->
 ## About The Project
 
-[![Delta][company-screenshot]](https://delta.app)
-
-Delta is a popular cryptocurrency portfolio tracking application for Android and iOS. As of May 2020, it has hundreds of thousands of monthly active users. Delta has a freemium model and users have the option to purchase its paid service, Delta Pro.
+[Delta](https://delta.app) is a popular cryptocurrency portfolio tracking application for Android and iOS. As of May 2020, it has hundreds of thousands of monthly active users. Delta has a freemium model and users have the option to purchase its paid service, Delta Pro.
 
 Target and Market uses anonymized user behaviour data for the app to help Delta better understand their users and tailor their marketing efforts to monetize more users.
 
@@ -56,5 +54,4 @@ Advait Hasabnis - advait.iitb@gmail.com
 Project Link: [https://github.com/advaithasabnis/insight](https://github.com/advaithasabnis/insight)
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[company-screenshot]: images/delta.png
-[company-screenshot]: images/clustering_scheme.png
+[clustering-scheme]: images/clustering_scheme.png
