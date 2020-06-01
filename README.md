@@ -37,6 +37,7 @@ Data for this project is private. Every user's events in the app are logged via 
 
 At the request of the company, numbers have been scaled using a multiplier to obfuscate real numbers. 
 
+<!-- APPROACH -->
 ## Approach
 <p align="center">
 	<img src="images/clustering_scheme.png" alt="Clustering Scheme" width="400" height="400">
@@ -47,6 +48,8 @@ At the request of the company, numbers have been scaled using a multiplier to ob
 <li>Cluster users</li>
 <li>Validate clusters by visualization and lift in terms of ratio of paid users</li>
 </ul>
+
+<!-- TOOLS AND FRAMEWORKS -->
 ## Built With
 * [BigQuery](https://cloud.google.com/bigquery/)
 * [Pandas](https://pandas.pydata.org/)
