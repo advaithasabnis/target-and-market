@@ -41,11 +41,12 @@ At the request of the company, numbers have been scaled using a multiplier to ob
 <p align="center">
 	<img src="images/clustering_scheme.png" alt="Clustering Scheme" width="400" height="400">
 </p>
-* Query required data from BigQuery
-* Engineer features: total engagement time, frequency of interaction, recency
-* Cluster users
-* Validate clusters by visualization and lift in terms of ratio of paid users
-
+<ul>
+<li>Query required data from BigQuery</li>
+<li>Engineer features: average session time, date of first install, recency (last session)</li>
+<li>Cluster users</li>
+<li>Validate clusters by visualization and lift in terms of ratio of paid users</li>
+</ul>
 ## Built With
 * [BigQuery](https://cloud.google.com/bigquery/)
 * [Pandas](https://pandas.pydata.org/)
