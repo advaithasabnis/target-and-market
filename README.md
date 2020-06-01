@@ -39,7 +39,7 @@ At the request of the company, numbers have been scaled using a multiplier to ob
 
 ## Approach
 <p align="center">
-[![Customer Segmentation][clustering-scheme]](https://github.com/advaithasabnis/insight)
+	<img src="images/clustering_scheme.png" alt="Clustering Scheme" width="400" height="400">
 </p>
 * Query required data from BigQuery
 * Engineer features: total engagement time, frequency of interaction, recency
