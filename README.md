@@ -9,7 +9,7 @@
     <br />
     by Advait Hasabnis
     <br />
-    <a href="https://github.com/advaithasabnis/"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/advaithasabnis/insight"><strong>Explore the docs »</strong></a>
 </p>
 
 
