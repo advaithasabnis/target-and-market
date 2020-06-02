@@ -10,7 +10,7 @@ import pandas as pd
 from pathlib import Path
 from google.cloud import bigquery
 
-from target_and_market.config import data_folder
+from targetandmarket.config import data_folder
 
 # Uncomment following options for better viewability in IPython console
 pd.set_option('display.max_rows', 20)
@@ -23,6 +23,7 @@ SERVICE_ACCOUNT = os.environ['GOOGLE_API_KEY']
 bqclient = bigquery.Client.from_service_account_json(SERVICE_ACCOUNT)
 
 #%% Users who have at least one session with no session_id
+# These users will be removed from the dataset
 query = """
 SELECT
     user_id,
@@ -48,9 +49,8 @@ SELECT
     t1.user_id,
     t2.sessions,
     t2.last_session,
-    t2.total_eng_time,
-    t2.avg_session_time,
-    t3.last_interaction,
+    t2.total_time,
+    t2.avg_session,
     t3.first_open
 -- Only select users with app version greater than 3.0.0
 FROM (
@@ -70,9 +70,9 @@ INNER JOIN (
     SELECT
         user_id,
         COUNT(session_id) AS sessions,
-        MAX(last_event) AS last_session,
-        SUM(session_time) AS total_eng_time,
-        AVG(session_time) AS avg_session_time
+        MAX(last_event)/1000000 AS last_session,
+        SUM(session_time)/1000 AS total_time,
+        AVG(session_time)/1000 AS avg_session
     FROM (
         SELECT
             user_id,
@@ -101,8 +101,7 @@ ON t1.user_id = t2.user_id
 INNER JOIN (
     SELECT
         user_id,
-        MAX(event_timestamp) AS last_interaction,
-        MAX(properties.value.int_value) AS first_open
+        MAX(properties.value.int_value)/1000 AS first_open
     FROM `analytics_157832975.events_202005*`,
     UNNEST(user_properties) AS properties
     WHERE properties.key = "first_open_time"
@@ -118,5 +117,35 @@ user_analytics = pd.DataFrame(bqclient.query(query_string_1)
                               )
 user_analytics.to_csv(data_folder/'user_analytics.csv')
 
-
-
+#%% Query engagement time per day for each user
+query_string_2 = """
+SELECT
+    user_id,
+    date,
+    SUM(session_time) AS day_eng_time,
+FROM (
+    SELECT
+        user_id,
+        MIN(event_date) AS date,
+        SUM(eng_time)/1000 AS session_time,
+    FROM (
+        SELECT
+            user_id,
+            event_date,
+            (SELECT value.int_value FROM UNNEST (event_params)
+             WHERE key = 'engagement_time_msec') AS eng_time,
+            (SELECT value.int_value FROM UNNEST (event_params)
+             WHERE key = 'ga_session_id') AS session_id,
+        FROM `analytics_157832975.events_202005*`
+        WHERE event_name = "user_engagement"
+    )
+    GROUP BY session_id, user_id
+    HAVING session_time > 10 AND session_time < 1800
+)
+GROUP BY user_id, date
+"""
+timeseries = pd.DataFrame(bqclient.query(query_string_2)
+                          .result()
+                          .to_dataframe()
+                          )
+timeseries.to_csv(data_folder/'timeseries.csv')
