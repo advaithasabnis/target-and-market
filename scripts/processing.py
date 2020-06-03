@@ -37,7 +37,7 @@ user_analytics = user_analytics_raw.loc[
     ~user_analytics_raw['user_id'].isin(user_error['user_id'])
     ].copy()
 
-# Users who started using the app between 01 Nov 2019 (6 months prior) and 01 May 2020 are selected
+# Users who started using the app since app launch and 01 May 2020 are selected
 user_analytics = user_analytics.loc[
     (user_analytics['first_open']>=PERIOD_START) &
     (user_analytics['first_open']<PERIOD_END)
