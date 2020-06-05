@@ -7,7 +7,7 @@ from tensorflow.keras.models import Model
 def create_model():
     # two sets of input, one for timeseries, other for aggregate features
     inputA = Input(shape=(31,1))
-    inputB = Input(shape=(3,))
+    inputB = Input(shape=(4,))
     
     # first branch operates on the timeseries
     x = LSTM(128)(inputA)
@@ -29,8 +29,8 @@ def create_model():
     return model
 
 
-def simple_model():
-    inputB = Input(shape=(3,))
+def simple_model(data):
+    inputB = Input(shape=(data.shape[1],))
     z = Dense(256, activation='relu')(inputB)
     z = Dropout(0.2)(z)
     z = Dense(128, activation='relu')(z)

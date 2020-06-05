@@ -41,8 +41,7 @@ user_error_status = pd.DataFrame(bqclient.query(query)
                                  )
 user_error_status.to_csv(data_folder/'user_error_status.csv')
 
-
-#%% Query user statistics from BigQuery
+#%% Query user statistics - average session time, total engagement time, last session, first session
 # Session considered between 10 seconds and 30 mins
 query_string_1 = """
 SELECT
@@ -115,9 +114,9 @@ user_analytics = pd.DataFrame(bqclient.query(query_string_1)
                               .result()
                               .to_dataframe()
                               )
-user_analytics.to_csv(data_folder/'user_analytics.csv')
+user_analytics.to_csv(data_folder/'user_analytics_raw.csv')
 
-#%% Query engagement time per day for each user
+#%% Engagement time per day for each user
 query_string_2 = """
 SELECT
     user_id,
@@ -149,3 +148,44 @@ timeseries = pd.DataFrame(bqclient.query(query_string_2)
                           .to_dataframe()
                           )
 timeseries.to_csv(data_folder/'timeseries.csv')
+
+#%% Users and geolocation
+query_string_3 = """
+SELECT DISTINCT user_id, geo.continent, geo.country
+FROM `analytics_157832975.events_202005*`
+"""
+
+user_geo = pd.DataFrame(bqclient.query(query_string_3)
+                                .result()
+                                .to_dataframe()
+                                )
+user_geo = user_geo.drop_duplicates(subset=['user_id'], keep=False)
+user_geo.to_csv(data_folder/'user_geo.csv')
+
+#%% Users who tried and purchased pro during May 
+query_string_4="""
+SELECT user_id, event_name, param.value.string_value AS product_id
+FROM `analytics_157832975.events_202005*`,
+UNNEST(event_params) AS param
+WHERE event_name IN ('in_app_purchase', 'ecommerce_purchase')
+AND param.key = 'product_id'
+"""
+user_purchases = pd.DataFrame(bqclient.query(query_string_4)
+                                      .result()
+                                      .to_dataframe()
+                                      )
+user_purchases.to_csv(data_folder/'user_purchases_may.csv')
+
+#%% Users who tried and purchased pro during June to validate model in the future
+query_string_5="""
+SELECT user_id, event_name, param.value.string_value AS product_id
+FROM `analytics_157832975.events_202006*`,
+UNNEST(event_params) AS param
+WHERE event_name IN ('in_app_purchase', 'ecommerce_purchase')
+AND param.key = 'product_id'
+"""
+user_purchases_total_june = pd.DataFrame(bqclient.query(query_string_5)
+                                                 .result()
+                                                 .to_dataframe()
+                                                 )
+user_purchases_total_june.to_csv(data_folder/'user_purchases_total_june.csv')

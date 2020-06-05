@@ -3,161 +3,77 @@
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import matplotlib.pyplot as plt
+import xgboost as xgb
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import GridSearchCV
+from targetandmarket.config import data_folder, appData_folder
 
-from tensorflow.keras import backend
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.metrics import AUC
-from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import train_test_split
-from targetandmarket.config import data_folder
-from targetandmarket.customfuncs import create_model
-from targetandmarket.customfuncs import simple_model
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import precision_recall_curve, auc, PrecisionRecallDisplay
+#%% Import and prepare data
+user_data = pd.read_csv(data_folder/'user_analytics.csv', index_col=0)
+# june_purchases = pd.read_csv(data_folder/'june_purchases.csv', index_col=0)
 
-#%%
-user_data = pd.read_csv(data_folder/'user_data.csv', index_col=0)
+#%% Features
+num_features = ['avg_session', 'last_session', 'first_open', 'holdings']
+nom_features = ['continent']
 
-X = user_data.iloc[:, :-1].values
-y = user_data.iloc[:, -1].values
+X = user_data.drop(['isPro'], axis=1).copy()
+y = user_data['isPro'].copy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                     test_size=0.25,
-                                                    random_state=42)
+                                                    random_state=0,
+                                                    stratify=y)
 
-sc = MinMaxScaler()
-X_train = sc.fit_transform(X_train)
-X_test = sc.transform(X_test)
+#%% Preprocessing
+preprocessor = ColumnTransformer(transformers=[
+    ('numerical', StandardScaler(), num_features),
+    ('nominal', OneHotEncoder(categories='auto', drop='first'), nom_features)
+    ])
+X_train = preprocessor.fit_transform(X_train)
+X_test = preprocessor.transform(X_test)
+
+#%% Tuning Xgboost
+params = {'n_estimators': [150, 175, 200],
+                'max_depth': [2, 3],
+                'learning_rate': [0.09, 0.095, 0.1],
+                'colsample_bytree': [0.65],
+                'reg_lambda': [16, 32],
+                'gamma': [1],
+                'min_child_weight': [1.5],
+                'objective': ['binary:logistic'],
+                'scale_pos_weight': [10, 20, 30]
+                }
+grid = GridSearchCV(xgb.XGBClassifier(), params,cv=5, verbose=1, n_jobs=-1, scoring='roc_auc')
+grid.fit(X_train, y_train)
+print('Best parameters:', grid.best_params_)
+print('Best score:', grid.best_score_)
+
+#%% Check against test set
+y_pred_test = grid.predict_proba(X_test)[:, 1:]
+print(f'Test ROC AUC: {roc_auc_score(y_test, y_pred_test):0.3f}')
+
+#%% Training model on full dataset
+xgb_classifier = xgb.XGBClassifier(n_estimators=175, max_depth=2, learning_rate=0.095,
+                                   colsample_bytree=0.65, reg_lambda=32, gamma=1,
+                                   min_child_weight=1.5, objective='binary:logistic',
+                                   scale_pos_weight=20)
+
+X_full = preprocessor.fit_transform(X)
+y_full = y.values
+
+xgb_classifier.fit(X_full, y_full)
+y_pred = xgb_classifier.predict_proba(X_full)[:, 1:]
+print(f'ROC AUC: {roc_auc_score(y_full, y_pred):0.3f}')
+
+#%% Save predictions for Dash app
+user_predictions = user_data[['user_id', 'isPro']].copy()
+user_predictions.loc[:, 'prediction'] = y_pred
+user_predictions.to_csv(appData_folder/'user_predictions.csv')
 
 
-#%% Training and validation - Combined timeseries and aggregate
-train_preds = np.zeros((len(X_train)))
-test_preds = np.zeros((len(X_test)))
 
-i = 1
-skfolds = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-for train_index, valid_index in skfolds.split(X_train, y_train):
-    X_train_folds, X_valid_fold = X_train[train_index], X_train[valid_index]
-    y_train_folds, y_valid_fold = y_train[train_index], y_train[valid_index]
-    
-    X_train_folds_A = X_train_folds[:, :31]
-    X_train_folds_B = X_train_folds[:, -3:]
-    
-    X_valid_fold_A = X_valid_fold[:, :31]
-    X_valid_fold_B = X_valid_fold[:, -3:]
-    
-    X_test_A = X_test[:, :31]
-    X_test_B = X_test[:, -3:]
-    
-    X_train_folds_A = X_train_folds_A.reshape(X_train_folds_A.shape[0],
-                                              X_train_folds_A.shape[1],
-                                              1)
-    X_valid_fold_A = X_valid_fold_A.reshape(X_valid_fold_A.shape[0],
-                                            X_valid_fold_A.shape[1],
-                                            1)
-    X_test_A = X_test_A.reshape(X_test_A.shape[0], X_test_A.shape[1],1)
 
-    model = create_model()
-    model.compile(loss='binary_crossentropy',
-                  optimizer='adam',
-                  metrics=AUC(curve='PR'))
-    
-    early_stopping = EarlyStopping(monitor='val_auc',
-                                   min_delta=0.001,
-                                   patience=5,
-                                   mode='max',
-                                   baseline=None,
-                                   restore_best_weights=True,
-                                   verbose=1)
-    reduce_lr = ReduceLROnPlateau(monitor='val_auc',
-                                  factor=0.5,
-                                  patience=3,
-                                  min_lr=1e-6,
-                                  mode='max',
-                                  verbose=1)
-    model.fit([X_train_folds_A, X_train_folds_B],
-              y_train_folds,
-              validation_data=([X_valid_fold_A, X_valid_fold_B], y_valid_fold),
-              verbose=0,
-              batch_size=256,
-              callbacks=[early_stopping, reduce_lr],
-              epochs=100,
-              class_weight={0: 1, 1: 200}
-              )
-    
-    valid_fold_preds = model.predict([X_valid_fold_A, X_valid_fold_B])
-    test_fold_preds = model.predict([X_test_A, X_test_B])
-    train_preds[valid_index] = valid_fold_preds.ravel()
-    test_preds += test_fold_preds.ravel()
-    precision, recall, thresholds = precision_recall_curve(y_valid_fold, valid_fold_preds)
-    print("Fold Number ",i," - AUPRC = ", auc(recall, precision))
-    backend.clear_session()
-    i += 1
-
-precision, recall, thresholds = precision_recall_curve(y_train, train_preds)
-print("Overall Training AUPRC=",auc(recall, precision))
-
-test_preds /= skfolds.get_n_splits()
-precision, recall, thresholds = precision_recall_curve(y_test, test_preds)
-print("Overall Training AUPRC=",auc(recall, precision))
-
-#%% Training and validation - only using aggregate features
-train_preds = np.zeros((len(X_train)))
-test_preds = np.zeros((len(X_test)))
-
-i = 1
-skfolds = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-for train_index, valid_index in skfolds.split(X_train, y_train):
-    X_train_folds, X_valid_fold = X_train[train_index], X_train[valid_index]
-    y_train_folds, y_valid_fold = y_train[train_index], y_train[valid_index]
-    
-    X_train_folds_B = X_train_folds[:, -3:]
-    X_valid_fold_B = X_valid_fold[:, -3:]
-    X_test_B = X_test[:, -3:]
-
-    model = simple_model()
-    model.compile(loss='binary_crossentropy',
-                  optimizer='nadam',
-                  metrics=AUC(curve='PR'))
-    
-    early_stopping = EarlyStopping(monitor='val_auc',
-                                   min_delta=0.001,
-                                   patience=5,
-                                   mode='max',
-                                   baseline=None,
-                                   restore_best_weights=True,
-                                   verbose=1)
-    reduce_lr = ReduceLROnPlateau(monitor='val_auc',
-                                  factor=0.5,
-                                  patience=3,
-                                  min_lr=1e-6,
-                                  mode='max',
-                                  verbose=1)
-    model.fit(X_train_folds_B,
-              y_train_folds,
-              validation_data=(X_valid_fold_B, y_valid_fold),
-              verbose=0,
-              batch_size=256,
-              callbacks=[early_stopping, reduce_lr],
-              epochs=100,
-              class_weight={0: 1, 1: 20}
-              )
-    
-    valid_fold_preds = model.predict(X_valid_fold_B)
-    test_fold_preds = model.predict(X_test_B)
-    train_preds[valid_index] = valid_fold_preds.ravel()
-    test_preds += test_fold_preds.ravel()
-    precision, recall, thresholds = precision_recall_curve(y_valid_fold, valid_fold_preds)
-    print("Fold Number ",i," - AUPRC = ", auc(recall, precision))
-    backend.clear_session()
-    i += 1
-
-precision, recall, thresholds = precision_recall_curve(y_train, train_preds)
-print("Overall Training AUPRC=",auc(recall, precision))
-
-test_preds /= skfolds.get_n_splits()
-precision, recall, thresholds = precision_recall_curve(y_test, test_preds)
-print("Overall Training AUPRC=",auc(recall, precision))
-
-#%% Plot PR Curve
-PrecisionRecallDisplay(precision, recall).plot()
