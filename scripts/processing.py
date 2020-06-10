@@ -58,7 +58,21 @@ user_analytics = user_analytics.astype('float64')
 #%% Merge geolocation
 user_geo = user_geo.dropna()
 user_analytics = pd.merge(user_analytics, user_geo, how='inner', on='user_id')
+# Separate North America from Americas
+user_analytics.loc[((user_analytics.continent=='Americas')
+               & (user_analytics.country.isin(['United States', 'Canada']))), 'continent'] = 'US & Canada'
+user_analytics.loc[user_analytics.continent=='Americas', 'continent'] = 'Rest of Americas'
 print('Number of users with geolocation:', len(user_analytics))
+
+#%% From time series data get number of active days
+timeseries = timeseries.pivot(index='user_id',
+                              columns='date',
+                              values='day_eng_time')
+active_days = pd.notna(timeseries).sum(axis=1)
+active_days.name = 'active_days'
+
+user_analytics = pd.merge(user_analytics, active_days, how='inner', on='user_id')
+print('Number of users with active days:', len(user_analytics))
 
 #%% Merge pro status and holdings with user analytics data
 # Holdings is the value of the portfolio managed in the app
@@ -102,11 +116,6 @@ user_purchases_june = user_purchases_june.sort_values(by=['user_id', 'product_id
 user_purchases_june = user_purchases_june.drop_duplicates(subset=['user_id'], keep='last')
 user_analytics = pd.merge(user_analytics, user_purchases_june, how='left', on='user_id')
 
-# Saving those who bought pro for later
-june_purchases = user_analytics.loc[((user_analytics.isPro==1) & (user_analytics.product_id==1)),
-                                    'user_id'].copy()
-june_purchases.to_csv(data_folder/'june_purchases.csv')
-
 # Set pro status for those who purchased or tried after June 01 as 0
 user_analytics.loc[((user_analytics.isPro==1) & (~pd.isna(user_analytics.product_id))), 'isPro'] = 0
 user_analytics = user_analytics.drop(['product_id'], axis=1)
@@ -115,3 +124,17 @@ print('Final number of users:', len(user_analytics))
 
 #%% Save processed data
 user_analytics.to_csv(data_folder/'user_analytics.csv')
+
+#%% Timeseries data
+# selected_columns = ['user_id', 'avg_session', 'last_session', 'first_open',
+#                     'holdings', 'continent', 'isPro']
+# user_data = pd.merge(timeseries,
+#                       user_analytics[selected_columns],
+#                       how='inner',
+#                       left_index=True,
+#                       right_on='user_id')
+# user_data = user_data.fillna(0)
+# user_data = user_data.reset_index(drop=True)
+
+# # Save processed data
+# user_data.to_csv(data_folder/'user_data.csv')
