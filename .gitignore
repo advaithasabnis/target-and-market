@@ -64,9 +64,10 @@ docs/_build/
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
-### Private information ###
-private/
+### Project specific ###
 data/
+saved_model/
+catboost_info/
 
 ### venv ###
 pyvenv.cfg
