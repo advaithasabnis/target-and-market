@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import pandas as pd
-
 from targetandmarket.config import data_folder
 
 # Uncomment following options for better viewability in IPython console
@@ -25,7 +23,6 @@ LAST_MODIFIED = 1590969600
 # by a hidden factor to obfuscate true values
 user_analytics_raw = pd.read_csv(data_folder/'user_analytics_raw.csv', index_col=0)
 user_error = pd.read_csv(data_folder/'user_error_status.csv', index_col=0)
-user_pro_status = pd.read_csv(data_folder/'user_pro_status.csv')
 timeseries = pd.read_csv(data_folder/'timeseries.csv', index_col=0)
 user_holdings = pd.read_csv(data_folder/'user_holdings.csv')
 user_geo = pd.read_csv(data_folder/'user_geo.csv', index_col=0)
@@ -125,16 +122,20 @@ print('Final number of users:', len(user_analytics))
 #%% Save processed data
 user_analytics.to_csv(data_folder/'user_analytics.csv')
 
-#%% Timeseries data
-# selected_columns = ['user_id', 'avg_session', 'last_session', 'first_open',
-#                     'holdings', 'continent', 'isPro']
-# user_data = pd.merge(timeseries,
-#                       user_analytics[selected_columns],
-#                       how='inner',
-#                       left_index=True,
-#                       right_on='user_id')
-# user_data = user_data.fillna(0)
-# user_data = user_data.reset_index(drop=True)
+#%% Process validation data
+user_purchases_total_june = pd.read_csv(data_folder/'user_purchases_total_june.csv', index_col=0)
+user_purchases_total_june = user_purchases_total_june.dropna()
+user_purchases_total_june = user_purchases_total_june.drop(['event_name'], axis=1)
+mapping = {'io.getdelta.android.delta_pro_yearly_trial': 0,
+           'io.getdelta.ios.DELTA_PRO_EARLY_BACKER_MONTHLY': 1,
+           'io.getdelta.ios.DELTA_PRO_YEARLY_TRIAL': 0,
+           'io.getdelta.ios.DELTA_PRO_EARLY_BACKER_MONTHLY_EQUALIZED': 1,
+           'io.getdelta.ios.DELTA_PRO_EARLY_BACKER_YEARLY': 1,
+           'io.getdelta.android.delta_pro_early_backer_yearly_equalized': 1
+           }
+user_purchases_total_june.loc[:, 'product_id'] = user_purchases_total_june['product_id'].map(mapping)
+user_purchases_total_june = user_purchases_total_june.sort_values(by=['user_id', 'product_id'])
+user_purchases_total_june = user_purchases_total_june.drop_duplicates(subset=['user_id'], keep='last')
+june_purchases = user_purchases_total_june.loc[user_purchases_total_june.product_id==1].copy()
 
-# # Save processed data
-# user_data.to_csv(data_folder/'user_data.csv')
+june_purchases.to_csv(data_folder/'june_purchases.csv')
