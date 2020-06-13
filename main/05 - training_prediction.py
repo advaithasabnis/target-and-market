@@ -21,10 +21,9 @@ def auprc(y_true, y_score):
 
 #%% Import and prepare data
 user_data = pd.read_csv(data_folder/'user_analytics.csv', index_col=0)
-user_data = user_data.drop(['country'], axis=1)
 
 #%% Features
-num_features = ['avg_session', 'last_session', 'first_open', 'active_days', 'holdings']
+num_features = ['avg_session', 'first_open', 'active_days', 'holdings', 'numberOfTransactions']
 nom_features = ['continent']
 
 X = user_data.drop(['isPro'], axis=1).copy()
@@ -45,12 +44,14 @@ X_test = preprocessor.transform(X_test)
 
 
 #%% Tuning Xgboost
-params = {'n_estimators': [80, 90, 100, 110],
-          'max_depth': [4],
-          'subsample': [0.8, 0.9, 1],
-          'learning_rate': [0.07, 0.075, 0.08],
-          'colsample_bytree': [0.7, 0.75],
-          'reg_lambda': [16],
+# Note: parameters were narrowed down from a wider range
+# and the below params only show the last round of tuning
+params = {'n_estimators': [80, 90, 100],
+          'max_depth': [3, 4],
+          'subsample': [0.7, 0.8, 0.9],
+          'learning_rate': [0.065, 0.07, 0.075],
+          'colsample_bytree': [0.6, 0.7],
+          'reg_lambda': [16, 32],
           'gamma': [1],
           'min_child_weight': [1.5],
           'objective': ['binary:logistic'],
@@ -70,31 +71,20 @@ y_score_test = grid.predict_proba(X_test)[:, 1:]
 print(f'Test ROC AUC: {auprc(y_test, y_score_test):0.3f}')
 
 #%% Training model on full dataset
-xgb_classifier = xgb.XGBClassifier(n_estimators=90, max_depth=4, learning_rate=0.075,
-                                   colsample_bytree=0.7, subsample=0.8, reg_lambda=16, gamma=1,
+xgb_classifier = xgb.XGBClassifier(n_estimators=90, max_depth=4, learning_rate=0.07,
+                                   colsample_bytree=0.7, subsample=0.9, reg_lambda=32, gamma=1,
                                    min_child_weight=1.5, objective='binary:logistic',
                                    scale_pos_weight=20)
 
 X_full = preprocessor.fit_transform(X)
 y_full = y.copy()
-features = ['avg_session', 'last_session', 'first_open', 'active_days', 'holdings', 'Asia', 'Europe', 'Oceania', 'Rest of Americas', 'US & Canada']
+features = num_features + ['Asia', 'Europe', 'Oceania', 'Rest of Americas', 'US & Canada']
 X_full = pd.DataFrame(data=X_full, columns=features)
 
 xgb_classifier.fit(X_full, y_full)
 y_score = xgb_classifier.predict_proba(X_full)[:, 1:]
 print(f'ROC AUC: {roc_auc_score(y_full, y_score):0.3f}')
 print(f'AUPRC: {auprc(y_full, y_score):0.3f}')
-
-#%% Explore feature importances
-import shap
-import matplotlib.pyplot as plt
-shap.initjs()
-explainer = shap.TreeExplainer(xgb_classifier)
-shap_values = explainer.shap_values(X_full)
-plt.figure()
-shap.summary_plot(shap_values, X_full)
-plt.show()
-
 
 #%% Save predictions for Dash app
 user_predictions = user_data.copy()

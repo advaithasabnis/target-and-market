@@ -8,6 +8,10 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 10)
 pd.set_option('display.width', 600)
 
+#%% INTRO
+# Data is available via various csv files and some data was queried into csv files from BigQuery
+# This file essentially cleans and merges all user data into one file for training models
+
 #%% Constants
 # Analyze users who joined before May 01 2020 since we are looking at
 # activity in May 2020
@@ -28,6 +32,7 @@ user_holdings = pd.read_csv(data_folder/'user_holdings.csv')
 user_geo = pd.read_csv(data_folder/'user_geo.csv', index_col=0)
 user_purchases = pd.read_csv(data_folder/'user_purchases_may.csv', index_col=0)
 user_purchases_june = pd.read_csv(data_folder/'user_purchases_early_june.csv', index_col=0)
+user_transactions = pd.read_csv(data_folder/'user_transactions.tsv', sep='\t')
 
 #%% Preprocessing
 # Session numbers are absent for some sessions.
@@ -55,11 +60,12 @@ user_analytics = user_analytics.astype('float64')
 #%% Merge geolocation
 user_geo = user_geo.dropna()
 user_analytics = pd.merge(user_analytics, user_geo, how='inner', on='user_id')
-# Separate North America from Americas
+# Separate North America (US & Canada) from Americas
 user_analytics.loc[((user_analytics.continent=='Americas')
                & (user_analytics.country.isin(['United States', 'Canada']))), 'continent'] = 'US & Canada'
 user_analytics.loc[user_analytics.continent=='Americas', 'continent'] = 'Rest of Americas'
 print('Number of users with geolocation:', len(user_analytics))
+user_analytics = user_analytics.drop(['country'], axis=1)
 
 #%% From time series data get number of active days
 timeseries = timeseries.pivot(index='user_id',
@@ -70,6 +76,15 @@ active_days.name = 'active_days'
 
 user_analytics = pd.merge(user_analytics, active_days, how='inner', on='user_id')
 print('Number of users with active days:', len(user_analytics))
+
+#%% Merge number of transactions data with user analytics
+user_analytics = pd.merge(user_analytics,
+                          user_transactions[['obfuscatedId', 'numberOfTransactions']],
+                          how='inner',
+                          left_on='user_id',
+                          right_on='obfuscatedId')
+user_analytics = user_analytics.drop(['obfuscatedId'], axis=1)
+print('Number of users with transaction data:', len(user_analytics))
 
 #%% Merge pro status and holdings with user analytics data
 # Holdings is the value of the portfolio managed in the app
@@ -122,7 +137,7 @@ print('Final number of users:', len(user_analytics))
 #%% Save processed data
 user_analytics.to_csv(data_folder/'user_analytics.csv')
 
-#%% Process validation data
+#%% Process validation data (purchases from June)
 user_purchases_total_june = pd.read_csv(data_folder/'user_purchases_total_june.csv', index_col=0)
 user_purchases_total_june = user_purchases_total_june.dropna()
 user_purchases_total_june = user_purchases_total_june.drop(['event_name'], axis=1)

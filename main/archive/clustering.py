@@ -15,7 +15,7 @@ df = pd.read_csv(appData_folder/'user_predictions.csv', index_col=0)
 june_purchases = pd.read_csv(data_folder/'june_purchases.csv', index_col=0)
 
 #%%
-NUMBER = 40000
+NUMBER = 10000
 df = df.sort_values(by=['prediction', 'holdings', 'avg_session'], ascending=False)
 
 dff = df.loc[df.isPro==0].copy()
@@ -117,3 +117,5 @@ fig.update_layout(
     )
 fig.show()
 
+#%% Validation
+validation = pd.merge(df, june_purchases, how='inner', on='user_id')
