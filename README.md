@@ -13,7 +13,7 @@
     <br />
     by Advait Hasabnis
     <br />
-    <a href="https://advait.herokuapp.com/"><strong>Explore the dashboard »</strong></a>
+    <a href="https://advait.herokuapp.com/" target="_blank"><strong>Explore the dashboard »</strong></a>
 </p>
 
 
@@ -59,12 +59,12 @@ At the request of the company, numbers have been scaled using a secret multiplie
 
 <!-- CONTACT -->
 ## Author
-Advait Hasabnis
-<br>
+<p><b>Advait Hasabnis</b></p>
+<p>
 Project Link: [https://github.com/advaithasabnis/insight](https://github.com/advaithasabnis/insight)
 <br>
 Dashboard Link: [https://advait.herokuapp.com/](https://advait.herokuapp.com/)
-
+</p>
 <!-- MARKDOWN LINKS & IMAGES -->
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat&logo=linkedin&colorB=2867B2
 [website-shield]: https://img.shields.io/badge/-Website-blueviolet?style=flat
