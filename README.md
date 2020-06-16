@@ -65,6 +65,7 @@ Project Link: [https://github.com/advaithasabnis/insight](https://github.com/adv
 <br>
 Dashboard Link: [https://advait.herokuapp.com/](https://advait.herokuapp.com/)
 </p>
+
 <!-- MARKDOWN LINKS & IMAGES -->
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat&logo=linkedin&colorB=2867B2
 [website-shield]: https://img.shields.io/badge/-Website-blueviolet?style=flat
