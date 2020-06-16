@@ -46,12 +46,19 @@ print(np.unique(labels, return_counts=True))
 
 df_cluster = dff[num_features].copy()
 df_cluster.loc[:, 'cluster'] = labels
-cluster_info = df_cluster.groupby(by='cluster').mean().copy()
+cluster_info = df_cluster.groupby(by='cluster').agg({'avg_session': 'mean', 'active_days': 'mean', 'holdings': ['mean', 'count']})
+cluster_info.columns = num_features + ['size']
+cluster_info.loc[cluster_info.avg_session.idxmax(), 'number'] = 1
+cluster_info.loc[cluster_info.active_days.idxmax(), 'number'] = 2
+cluster_info.loc[cluster_info.holdings.idxmax(), 'number'] = 3
+cluster_info.loc[:, 'number'] = cluster_info.number.fillna(4)
+cluster_info = cluster_info.sort_values(by='number')
+cluster_info = cluster_info.set_index('number')
 print(cluster_info)
 
 #%% Scaling for visualization
 mm = MinMaxScaler()
-clusters = mm.fit_transform(cluster_info)
+clusters = mm.fit_transform(cluster_info[num_features])
 clusters = pd.DataFrame(clusters, columns=num_features)
 
 feature_range = pd.DataFrame({'avg_session': np.arange(0,1.25,0.25),
