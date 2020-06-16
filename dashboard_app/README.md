@@ -13,7 +13,7 @@ The company can select the number of users that makes sense for their marketing 
 <!-- CONTACT -->
 ## Author
 <p><b>Advait Hasabnis</b></p>
-<p>Project Link: [https://github.com/advaithasabnis/insight](https://github.com/advaithasabnis/insight)
+
+Project Link: [https://github.com/advaithasabnis/insight](https://github.com/advaithasabnis/insight)
 <br>
-<p>Dashboard Link: [https://advait.herokuapp.com/](https://advait.herokuapp.com/)
-</p>
+Dashboard Link: [https://advait.herokuapp.com/](https://advait.herokuapp.com/)

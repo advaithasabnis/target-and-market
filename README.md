@@ -56,15 +56,16 @@ At the request of the company, numbers have been scaled using a secret multiplie
 * [Pandas](https://pandas.pydata.org/)
 * [Scikit-Learn](https://scikit-learn.org/stable/index.html)
 * [Plotly Dash](https://plotly.com/dash/)
+* [Heroku](https://www.heroku.com/)
 
 <!-- CONTACT -->
 ## Author
 <p><b>Advait Hasabnis</b></p>
-<p>
+
 Project Link: [https://github.com/advaithasabnis/insight](https://github.com/advaithasabnis/insight)
 <br>
 Dashboard Link: [https://advait.herokuapp.com/](https://advait.herokuapp.com/)
-</p>
+
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat&logo=linkedin&colorB=2867B2
