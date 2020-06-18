@@ -1,8 +1,19 @@
+chart-studio==1.1.0
+dash==1.12.0
+google-auth==1.16.0
 google-cloud-bigquery==1.24.0
+gunicorn==20.0.4
+hdbscan==0.8.26
+jupyter-client==6.1.3
+jupyter-core==4.6.3
+matplotlib==3.2.1
 numpy==1.18.4
 pandas==1.0.4
+plotly==4.8.1
 scikit-learn==0.23.1
-scipy==1.4.1
-# Editable install with no version control (target-market-advait==0.1)
+seaborn==0.10.1
+spyder==4.1.3
 # Custom lightweight python package for project configuration files
--e c:\users\advai\insight\target_and_market
+-e git+https://github.com/advaithasabnis/insight.git@338723223fd710dc0089425bc72db8230fb2d79e#egg=target_market_advait&subdirectory=targetandmarket
+tensorflow==2.2.0
+xgboost==1.0.2
