@@ -166,7 +166,8 @@ pio.renderers.default = 'browser'
 fig = go.Figure()
 fig.add_trace(go.Bar(
     x=performance.index,
-    y=performance.values
+    y=performance.values,
+    marker=dict(color='#6002EE'),
     ))
 config = {
   'toImageButtonOptions': {
