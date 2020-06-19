@@ -207,25 +207,38 @@ body {
   }
 }
 
-/* Top Navigation Bar */
+/* Top and Bottom Bars */
 .topnav {
   background-color: #111;
   height: 90px;
   margin-bottom: 20px;
 }
 
-#title {
+.footer {
+  background-color: #111;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.topnav-content, .footer-content {
+  max-width: 1160px;
   margin: 0 auto;
   padding-top: 10px;
-  padding-left: 10px;
-  max-width: 1160px;
+}
+
+#app_logo, .topnav-titles {
+  display: inline-block;
+}
+
+#app_logo {
+  margin-right: 10px;
+}
+
+#title {
+  margin-top: -10px;
 }
 
 #tagline {
-  margin: 0 auto;
-  padding-top: 10px;
-  padding-left: 10px;
-  max-width: 1160px;
   color: #ccc;
 }
 
@@ -273,12 +286,12 @@ blockquote {
 /* Links
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 a {
-  color: #1eaedb;
-  text-decoration: underline;
+  color: #ccc;
   cursor: pointer;
+  margin-right: 20px;
 }
 a:hover {
-  color: #0fa0ce;
+  color: #fff;
 }
 
 /* Controls

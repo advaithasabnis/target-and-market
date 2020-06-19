@@ -35,7 +35,7 @@ def make_pie_chart(df, user_slider):
 def make_holdings_figure(df, user_slider):
     dff = df.iloc[:user_slider, :].copy()
     x_val = dff.holdings.mean()
-    x_max = df.iloc[:5000, :].holdings.mean()
+    x_max = df.iloc[:2500, :].holdings.mean()
     
     fig = go.Figure()
     fig.add_trace(go.Bar(
@@ -84,7 +84,7 @@ def make_holdings_figure(df, user_slider):
 def make_avg_session_figure(df, user_slider):
     dff = df.iloc[:user_slider, :].copy()
     x_val = dff.total_time.sum()/dff.sessions.sum()
-    x_max = df.iloc[:5000, :].total_time.sum()/df.iloc[:5000, :].sessions.sum()
+    x_max = df.iloc[:2500, :].total_time.sum()/df.iloc[:2500, :].sessions.sum()
     
     fig = go.Figure()
     fig.add_trace(go.Bar(
@@ -239,7 +239,7 @@ def make_clusters_graph(clusters, feature_range):
             fixedrange=True
             ),
         margin=dict(l=0, t=0, b=0, r=0),
-        height=410
+        height=390
         )
     fig.update_layout(
         legend=dict(
