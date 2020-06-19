@@ -54,8 +54,7 @@ params = {'n_estimators': [80, 90, 100],
           'reg_lambda': [16, 32],
           'gamma': [1],
           'min_child_weight': [1.5],
-          'objective': ['binary:logistic'],
-          'scale_pos_weight': [20]
+          'objective': ['binary:logistic']
           }
 grid = GridSearchCV(xgb.XGBClassifier(),
                     params,cv=5,
@@ -71,10 +70,9 @@ y_score_test = grid.predict_proba(X_test)[:, 1:]
 print(f'Test ROC AUC: {auprc(y_test, y_score_test):0.3f}')
 
 #%% Training model on full dataset
-xgb_classifier = xgb.XGBClassifier(n_estimators=90, max_depth=4, learning_rate=0.07,
-                                   colsample_bytree=0.7, subsample=0.9, reg_lambda=32, gamma=1,
-                                   min_child_weight=1.5, objective='binary:logistic',
-                                   scale_pos_weight=20)
+xgb_classifier = xgb.XGBClassifier(n_estimators=100, max_depth=4, learning_rate=0.065,
+                                   colsample_bytree=0.7, subsample=0.8, reg_lambda=16, gamma=1,
+                                   min_child_weight=1.5, objective='binary:logistic')
 
 X_full = preprocessor.fit_transform(X)
 y_full = y.copy()
@@ -90,4 +88,3 @@ print(f'AUPRC: {auprc(y_full, y_score):0.3f}')
 user_predictions = user_data.copy()
 user_predictions.loc[:, 'prediction'] = y_score
 user_predictions.to_csv(appData_folder/'user_predictions.csv')
-

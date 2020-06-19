@@ -132,7 +132,6 @@ params = {'n_estimators': [80, 90, 100],
           'gamma': [1],
           'min_child_weight': [1.5],
           'objective': ['binary:logistic'],
-          'scale_pos_weight': [20]
           }
 grid = GridSearchCV(xgb.XGBClassifier(),
                     params,cv=5,

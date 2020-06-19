@@ -5,17 +5,26 @@ import pandas as pd
 from targetandmarket.config import appData_folder, data_folder
 import plotly.graph_objs as go
 import plotly.io as pio
-pio.renderers.default = "browser"
+
 
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.metrics import silhouette_score
+
+pio.templates["verdana"] = go.layout.Template(
+    layout=dict(paper_bgcolor='#212121', plot_bgcolor='#212121'),
+    layout_font=dict(family="verdana, arial", color="#ffffff"),
+    layout_hoverlabel=dict(font_family="verdana, arial")
+    )
+pio.templates.default = "plotly+verdana"
+pio.renderers.default = 'browser'
 
 #%%
 df = pd.read_csv(appData_folder/'user_predictions.csv', index_col=0)
 june_purchases = pd.read_csv(data_folder/'june_purchases.csv', index_col=0)
 
 #%%
-NUMBER = 10000
+NUMBER = 5000
 df = df.sort_values(by=['prediction', 'holdings', 'avg_session'], ascending=False)
 
 dff = df.loc[df.isPro==0].copy()
@@ -28,16 +37,17 @@ sc = StandardScaler()
 X = sc.fit_transform(dff[num_features])
 
 #%% Timing different algorithms
+# Optimal parameters for each algorithm is identified earlier based on the silhouette score
 import timeit
 from sklearn.cluster import DBSCAN, Birch
 from hdbscan import HDBSCAN
 
-methods = [KMeans(n_clusters=4), MiniBatchKMeans(n_clusters=4), DBSCAN(eps=0.5), HDBSCAN(min_cluster_size=100), Birch(n_clusters=4)]
-methods = [MiniBatchKMeans(n_clusters=4, random_state=1, batch_size=1000), MiniBatchKMeans(n_clusters=4, random_state=1, batch_size=100), MiniBatchKMeans(n_clusters=4, random_state=1, batch_size=5000)]
+methods = [KMeans(n_clusters=4), MiniBatchKMeans(n_clusters=4), DBSCAN(eps=0.5)]
+# methods = [MiniBatchKMeans(n_clusters=4, random_state=1, batch_size=1000), MiniBatchKMeans(n_clusters=4, random_state=1, batch_size=100), MiniBatchKMeans(n_clusters=4, random_state=1, batch_size=5000)]
 
 for algo in methods:
     print(algo, timeit.timeit('algo.fit(X)', globals=globals(), number=10))
-
+    
 #%% Clustering
 # n_clusters=4 chosen by comparing silhouette scores
 km = MiniBatchKMeans(n_clusters=4, random_state=21, batch_size=1000).fit(X)
@@ -55,6 +65,8 @@ cluster_info.loc[:, 'number'] = cluster_info.number.fillna(4)
 cluster_info = cluster_info.sort_values(by='number')
 cluster_info = cluster_info.set_index('number')
 print(cluster_info)
+print(silhouette_score(X, labels))
+
 
 #%% Scaling for visualization
 mm = MinMaxScaler()
@@ -126,3 +138,38 @@ fig.show()
 
 #%% Validation
 validation = pd.merge(df, june_purchases, how='inner', on='user_id')
+validation = validation.loc[validation.isPro==1].copy()
+
+#%%
+chart = pd.DataFrame([algos, x, y1]).T
+chart.columns = ['Method', 'Silhouette Score', 'Time (ms)']
+
+#%% Clustering algos visualization
+import plotly.express as px
+fig = px.scatter(chart, x='Time (ms)', y='Silhouette Score', color='Method', size=[4, 4, 4])
+fig.update_layout(
+    xaxis_gridcolor='#414141',
+    yaxis_gridcolor='#414141',
+    xaxis_zeroline=False
+    )
+config = {
+  'toImageButtonOptions': {
+    'format': 'svg',
+    'filename': 'custom_image',
+    'height': 500,
+    'width': 700,
+    'scale': 1
+    }
+  }
+fig.show(config=config)
+
+#%%
+precision=[]
+recall=[]
+size=[]
+for i in np.arange(0, 1, 0.01):
+    dff = df.loc[df.prediction>i].copy()
+    size.append(dff.shape[0])
+    precision.append(dff.isPro.mean())
+    recall.append(dff.isPro.sum()/3437)
+    
