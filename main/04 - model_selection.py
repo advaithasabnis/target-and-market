@@ -1,7 +1,13 @@
-# SUMMARY:
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 27 2020
+
+@author: Advait Hasabnis
+
 # Tuned various models and compared performance
 # Area under precision recall curve used as metric
 # XGBoost chosen as final model
+"""
 
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler

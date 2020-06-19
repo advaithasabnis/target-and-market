@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Wed May 27 2020
+
+@author: Advait Hasabnis
+
+Train and predict probability, for each user, that they are like a paid user using XGBoost.
+Output probability predictions for front-end dashboard.
+"""
 
 import numpy as np
 import pandas as pd

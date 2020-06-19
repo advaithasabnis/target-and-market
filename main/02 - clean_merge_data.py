@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Wed May 27 2020
+
+@author: Advait Hasabnis
+
+Clean and merge user data that was retrieved from BigQuery and SQL into csv files
+"""
 
 import pandas as pd
 from targetandmarket.config import data_folder
@@ -8,9 +15,6 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 10)
 pd.set_option('display.width', 600)
 
-#%% INTRO
-# Data is available via various csv files and some data was queried into csv files from BigQuery
-# This file essentially cleans and merges all user data into one file for training models
 
 #%% Constants
 # Analyze users who joined before May 01 2020 since we are looking at
