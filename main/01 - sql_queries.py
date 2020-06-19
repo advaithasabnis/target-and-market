@@ -3,6 +3,9 @@
 Created on Wed May 27 2020
 
 @author: Advait Hasabnis
+
+SQL Queries to retrieve user behaviour data from BigQuery and
+investment portfolio data from MySQL
 """
 
 import os
@@ -11,11 +14,6 @@ from pathlib import Path
 from google.cloud import bigquery
 
 from targetandmarket.config import data_folder
-
-# Uncomment following options for better viewability in IPython console
-pd.set_option('display.max_rows', 20)
-pd.set_option('display.max_columns', 10)
-pd.set_option('display.width', 600)
 
 #%% BigQuery client
 
@@ -162,7 +160,8 @@ user_geo = pd.DataFrame(bqclient.query(query_string_3)
 user_geo = user_geo.drop_duplicates(subset=['user_id'], keep=False)
 user_geo.to_csv(data_folder/'user_geo.csv')
 
-#%% Users who tried and purchased pro during May 
+#%% Users who started a free trial of Pro in May
+# These users will be set as non-paying users since they haven't paid yet
 query_string_4="""
 SELECT user_id, event_name, param.value.string_value AS product_id
 FROM `analytics_157832975.events_202005*`,
@@ -189,3 +188,41 @@ user_purchases_total_june = pd.DataFrame(bqclient.query(query_string_5)
                                                  .to_dataframe()
                                                  )
 user_purchases_total_june.to_csv(data_folder/'user_purchases_total_june.csv')
+
+
+#%% MySQL queries for investment portfolio data
+# Note that some constants are hidden to obfuscate real user IDs
+# Query value of investment portfolio
+mysql_query_1 = """
+SELECT
+    ((u.id * X) & Y) ^ Z AS obfuscatedId,
+    u.isPro,
+    ph.coin,
+    ph.holdings * tp.priceInUSD AS holdingsInUSD
+FROM Users AS u
+INNER JOIN Portfolios AS p
+ON p.userId = u.id
+INNER JOIN PortfolioHoldings AS ph
+ON ph.portfolioID = p.id
+INNER JOIN TradePairPrices AS tp
+ON tp.exchange = ph.exchange
+    AND tp.baseCoinID = ph.CoinID
+    AND tp.quoteCoinId = ph.quoteCoinId
+WHERE
+    u.status = 'ACTIVE'
+    AND p.status = 'OK'
+"""
+
+# Query number of transactions
+mysql_query_2 = """
+SELECT
+    ((u.id * X) & Y) ^ Z AS obfuscatedId,
+    COUNT(t.id) AS numberOfTransactions
+FROM Users AS u
+INNER JOIN Transactions AS t
+ON t.userId = u.id
+WHERE t.status = 'OK'
+GROUP BY u.id
+"""
+
+# Queries run on MySQL and results downloaded as csv files
