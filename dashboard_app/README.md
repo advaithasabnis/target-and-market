@@ -14,6 +14,6 @@ The company can select the number of users that makes sense for their marketing 
 ## Author
 <p><b>Advait Hasabnis</b></p>
 
-Project Link: [https://github.com/advaithasabnis/insight](https://github.com/advaithasabnis/insight)
+Project Link: [https://github.com/advaithasabnis/target-and-market](https://github.com/advaithasabnis/target-and-market)
 <br>
 Dashboard Link: [https://advait.herokuapp.com/](https://advait.herokuapp.com/)
