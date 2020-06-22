@@ -10,8 +10,7 @@ Created on Wed May 27 2020
 """
 
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -36,9 +35,8 @@ user_data = pd.read_csv(data_folder/'user_analytics.csv', index_col=0)
 
 #%% Features
 num_features = ['avg_session', 'first_open', 'active_days', 'holdings', 'numberOfTransactions']
-nom_features = ['continent']
 
-X = user_data.drop(['isPro'], axis=1).copy()
+X = user_data[num_features].copy()
 y = user_data['isPro'].copy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,
@@ -47,10 +45,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                     stratify=y)
 
 #%% Preprocessing
-preprocessor = ColumnTransformer(transformers=[
-    ('numerical', StandardScaler(), num_features),
-    ('nominal', OneHotEncoder(categories='auto', drop='first'), nom_features)
-    ])
+preprocessor = StandardScaler()
 X_train = preprocessor.fit_transform(X_train)
 X_test = preprocessor.transform(X_test)
 

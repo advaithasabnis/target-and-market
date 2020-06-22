@@ -12,8 +12,7 @@ import numpy as np
 import pandas as pd
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score, precision_recall_curve, auc, make_scorer
 from sklearn.model_selection import GridSearchCV
 from targetandmarket.config import data_folder, appData_folder
@@ -32,9 +31,8 @@ user_data = pd.read_csv(data_folder/'user_analytics.csv', index_col=0)
 
 #%% Features
 num_features = ['avg_session', 'first_open', 'active_days', 'holdings', 'numberOfTransactions']
-nom_features = ['continent']
 
-X = user_data.drop(['isPro'], axis=1).copy()
+X = user_data[num_features].copy()
 y = user_data['isPro'].copy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,
@@ -43,10 +41,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                     stratify=y)
 
 #%% Preprocessing
-preprocessor = ColumnTransformer(transformers=[
-    ('numerical', StandardScaler(), num_features),
-    ('nominal', OneHotEncoder(categories='auto', drop='first'), nom_features)
-    ])
+preprocessor = StandardScaler()
 X_train = preprocessor.fit_transform(X_train)
 X_test = preprocessor.transform(X_test)
 
@@ -84,8 +79,7 @@ xgb_classifier = xgb.XGBClassifier(n_estimators=100, max_depth=4, learning_rate=
 
 X_full = preprocessor.fit_transform(X)
 y_full = y.copy()
-features = num_features + ['Asia', 'Europe', 'Oceania', 'Rest of Americas', 'US & Canada']
-X_full = pd.DataFrame(data=X_full, columns=features)
+X_full = pd.DataFrame(data=X_full, columns=num_features)
 
 xgb_classifier.fit(X_full, y_full)
 y_score = xgb_classifier.predict_proba(X_full)[:, 1:]
