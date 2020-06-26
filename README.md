@@ -31,7 +31,7 @@
 ## About The Project
 This project is in collaboration with a company that develops a popular cryptocurrency portfolio tracking application for Android and iOS. As of May 2020, it has hundreds of thousands of monthly active users. The app has a freemium model and users have the option to purchase its paid premium service. The app does not store any personal information about its users such as their email addresses or phone numbers. As a result, targeted marketing efforts are impeded by the lack of personal or demographic information.
 
-<b>Target and Market</b> uses anonymized user behaviour and in-app data to identify the best candidates (that are most likely to convert) for a marketing campaign. The tool further segments the selected targets to enable the company to maximize their return on marketing investment by tailoring their campaign to each segment.
+**Target and Market** uses anonymized user behaviour and in-app data to identify the best candidates (that are most likely to convert) for a marketing campaign. The tool further segments the selected targets to enable the company to maximize their return on marketing investment by tailoring their campaign to each segment.
 
 <!-- DATA -->
 ## Data
@@ -42,7 +42,7 @@ At the request of the company, numbers have been scaled using a secret multiplie
 <!-- APPROACH -->
 ## Approach
 <p align="center">
-    <img src="images/approach.png" alt="Approach" height="200">
+    <img src="images/approach.png" alt="Approach" height="220">
 </p>
 
 ### Data
@@ -62,11 +62,11 @@ Additional features from the investment data were created. Two key features incl
 I used a classification model (XGBoost) to estimate a probability for each user that they are a paid user. Free users that have a high estimated probability are expected to convert at a better rate than those with lower probabilities. 
 
 ### Dashboard
-<b>Input</b>: The company inputs the number of users (N) they want to target for a particular marketing campaign.
-<br />
-<b>Background Process</b>: The top N users (by estimated probability) are selected and their characteristics displayed. A clustering algorithm (Mini Batch K-Means) segments the N selected users based on three key features.
-<br />
-<b>Output</b>: The dashboard displays characteristics such as average session time, average value of investments, and average days of activity in May of the selected N users. Secondly, the dashboard also displays characteristics of each identified cluster and their unique qualities.
+**Input**: The company inputs the number of users (N) they want to target for a particular marketing campaign.
+
+**Background Process**: The top N users (by estimated probability) are selected and their characteristics displayed. A clustering algorithm (Mini Batch K-Means) segments the N selected users based on three key features.
+
+**Output**: The dashboard displays characteristics such as average session time, average value of investments, and average days of activity in May of the selected N users. Secondly, the dashboard also displays characteristics of each identified cluster and their unique qualities.
 
 <!-- TOOLS AND FRAMEWORKS -->
 ## Built With
@@ -80,10 +80,10 @@ I used a classification model (XGBoost) to estimate a probability for each user 
 
 <!-- CONTACT -->
 ## Author
-<p><b>Advait Hasabnis</b></p>
+**Advait Hasabnis**
 
 Project Link: [https://github.com/advaithasabnis/target-and-market](https://github.com/advaithasabnis/target-and-market)
-<br>
+
 Dashboard Link: [https://advait.herokuapp.com/](https://advait.herokuapp.com/)
 
 
