@@ -45,10 +45,10 @@ At the request of the company, numbers have been scaled using a secret multiplie
     <img src="images/approach.png" alt="Approach" height="220">
 </p>
 
-### Data
+#### 1) Data
 I queried behaviour data from BigQuery (1 table for each day of May) and investment portfolio data from MySQL (multiple tables containing user information, transaction information, asset price information).</li>
 
-### Feature Engineering
+#### 2) Feature Engineering
 I created the features using the 150 million events logged via Google Analytics. Some of the important ones include:
 * Engagement (average session time)
 * Frequency (active days in May) and
@@ -58,10 +58,10 @@ Additional features from the investment data were created. Two key features incl
 * Value of investments
 * Number of transactions
 
-### Probability Prediction
+#### 3) Probability Prediction
 I used a classification model (XGBoost) to estimate a probability for each user that they are a paid user. Free users that have a high estimated probability are expected to convert at a better rate than those with lower probabilities. 
 
-### Dashboard
+#### 4) Dashboard
 **Input**: The company inputs the number of users (N) they want to target for a particular marketing campaign.
 
 **Background Process**: The top N users (by estimated probability) are selected and their characteristics displayed. A clustering algorithm (Mini Batch K-Means) segments the N selected users based on three key features.
