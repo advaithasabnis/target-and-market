@@ -192,13 +192,14 @@ user_purchases_total_june.to_csv(data_folder/'user_purchases_total_june.csv')
 
 #%% MySQL queries for investment portfolio data
 # Note that some constants are hidden to obfuscate real user IDs
-# Query value of investment portfolio
+
+# Retrieves value of total investments per user
 mysql_query_1 = """
 SELECT
     ((u.id * X) & Y) ^ Z AS obfuscatedId,
     u.isPro,
-    ph.coin,
-    ph.holdings * tp.priceInUSD AS holdingsInUSD
+    u.status,
+    SUM(ph.holdings * tp.priceInUSD) AS holdingsInUSD
 FROM Users AS u
 INNER JOIN Portfolios AS p
 ON p.userId = u.id
@@ -211,9 +212,10 @@ ON tp.exchange = ph.exchange
 WHERE
     u.status = 'ACTIVE'
     AND p.status = 'OK'
+GROUP BY u.id
 """
 
-# Query number of transactions
+# Retrieves total number of transactions per user
 mysql_query_2 = """
 SELECT
     ((u.id * X) & Y) ^ Z AS obfuscatedId,
@@ -225,4 +227,4 @@ WHERE t.status = 'OK'
 GROUP BY u.id
 """
 
-# Queries run on MySQL and results downloaded as csv files
+# Note about MySQL: you can group without all fields needing an aggregation function
