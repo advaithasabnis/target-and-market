@@ -61,16 +61,6 @@ user_analytics.loc[:, 'first_open'] = ((LAST_MODIFIED
                                        / (60*60*24))
 user_analytics = user_analytics.astype('float64')
 
-#%% Merge geolocation
-user_geo = user_geo.dropna()
-user_analytics = pd.merge(user_analytics, user_geo, how='inner', on='user_id')
-# Separate North America (US & Canada) from Americas
-user_analytics.loc[((user_analytics.continent=='Americas')
-               & (user_analytics.country.isin(['United States', 'Canada']))), 'continent'] = 'US & Canada'
-user_analytics.loc[user_analytics.continent=='Americas', 'continent'] = 'Rest of Americas'
-print('Number of users with geolocation:', len(user_analytics))
-user_analytics = user_analytics.drop(['country'], axis=1)
-
 #%% From time series data get number of active days
 timeseries = timeseries.pivot(index='user_id',
                               columns='date',
@@ -83,7 +73,7 @@ print('Number of users with active days:', len(user_analytics))
 
 #%% Merge number of transactions data with user analytics
 user_analytics = pd.merge(user_analytics,
-                          user_transactions[['obfuscatedId', 'numberOfTransactions']],
+                          user_transactions[['obfuscatedId', 'numberOfTransactions', 'numberOfCoins']],
                           how='inner',
                           left_on='user_id',
                           right_on='obfuscatedId')

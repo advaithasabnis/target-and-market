@@ -29,7 +29,7 @@ def auprc(y_true, y_score):
 user_data = pd.read_csv(data_folder/'user_analytics.csv', index_col=0)
 
 #%% Features
-num_features = ['avg_session', 'first_open', 'active_days', 'holdings', 'numberOfTransactions']
+num_features = ['avg_session', 'last_session', 'active_days', 'holdings', 'numberOfTransactions']
 
 X = user_data[num_features].copy()
 y = user_data['isPro'].copy()
