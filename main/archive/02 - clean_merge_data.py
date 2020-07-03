@@ -4,7 +4,7 @@ Created on Wed May 27 2020
 
 @author: Advait Hasabnis
 
-Clean and merge user data that was retrieved from BigQuery and SQL into csv files
+Clean and merge user data that was retrieved from BigQuery and MySQL into csv files
 """
 
 import pandas as pd
