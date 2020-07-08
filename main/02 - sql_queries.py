@@ -20,25 +20,6 @@ from targetandmarket.config import data_folder
 SERVICE_ACCOUNT = os.environ['GOOGLE_API_KEY']
 bqclient = bigquery.Client.from_service_account_json(SERVICE_ACCOUNT)
 
-#%% Users who have at least one session with no session_id
-# These users will be removed from the dataset
-query = """
-SELECT
-    user_id,
-    (SELECT value.int_value FROM UNNEST (event_params)
-     WHERE key = 'ga_session_id') AS session_id,
-FROM `analytics_157832975.events_202005*`
-WHERE event_name = "user_engagement"
-GROUP BY session_id, user_id
-HAVING session_id IS NULL
-"""
-
-user_error_status = pd.DataFrame(bqclient.query(query)
-                                 .result()
-                                 .to_dataframe()
-                                 )
-user_error_status.to_csv(data_folder/'user_error_status.csv')
-
 #%% Query user statistics - average session time, total engagement time, last session, first session
 # Session considered between 10 seconds and 30 mins
 query_string_1 = """
@@ -108,10 +89,7 @@ INNER JOIN (
 ON t1.user_id = t3.user_id
 """
 
-user_analytics = pd.DataFrame(bqclient.query(query_string_1)
-                              .result()
-                              .to_dataframe()
-                              )
+user_analytics = pd.DataFrame(bqclient.query(query_string_1).result().to_dataframe())
 user_analytics.to_csv(data_folder/'user_analytics_raw.csv')
 
 #%% Engagement time per day for each user
@@ -141,24 +119,25 @@ FROM (
 )
 GROUP BY user_id, date
 """
-timeseries = pd.DataFrame(bqclient.query(query_string_2)
-                          .result()
-                          .to_dataframe()
-                          )
+timeseries = pd.DataFrame(bqclient.query(query_string_2).result().to_dataframe())
 timeseries.to_csv(data_folder/'timeseries.csv')
 
-#%% Users and geolocation
+
+#%% Users who have at least one session with no session_id
+# These users will be removed from the dataset
 query_string_3 = """
-SELECT DISTINCT user_id, geo.continent, geo.country
+SELECT
+    user_id,
+    (SELECT value.int_value FROM UNNEST (event_params)
+     WHERE key = 'ga_session_id') AS session_id,
 FROM `analytics_157832975.events_202005*`
+WHERE event_name = "user_engagement"
+GROUP BY session_id, user_id
+HAVING session_id IS NULL
 """
 
-user_geo = pd.DataFrame(bqclient.query(query_string_3)
-                                .result()
-                                .to_dataframe()
-                                )
-user_geo = user_geo.drop_duplicates(subset=['user_id'], keep=False)
-user_geo.to_csv(data_folder/'user_geo.csv')
+user_error_status = pd.DataFrame(bqclient.query(query_string_3).result().to_dataframe())
+user_error_status.to_csv(data_folder/'user_error_status.csv')
 
 #%% Users who started a free trial of Pro in May
 # These users will be set as non-paying users since they haven't paid yet
@@ -169,13 +148,10 @@ UNNEST(event_params) AS param
 WHERE event_name IN ('in_app_purchase', 'ecommerce_purchase')
 AND param.key = 'product_id'
 """
-user_purchases = pd.DataFrame(bqclient.query(query_string_4)
-                                      .result()
-                                      .to_dataframe()
-                                      )
+user_purchases = pd.DataFrame(bqclient.query(query_string_4).result().to_dataframe())
 user_purchases.to_csv(data_folder/'user_purchases_may.csv')
 
-#%% Users who tried and purchased pro during June to validate model in the future
+#%% For users who purchased pro during June to validate model in the future
 query_string_5="""
 SELECT user_id, event_name, param.value.string_value AS product_id
 FROM `analytics_157832975.events_202006*`,
@@ -183,10 +159,7 @@ UNNEST(event_params) AS param
 WHERE event_name IN ('in_app_purchase', 'ecommerce_purchase')
 AND param.key = 'product_id'
 """
-user_purchases_total_june = pd.DataFrame(bqclient.query(query_string_5)
-                                                 .result()
-                                                 .to_dataframe()
-                                                 )
+user_purchases_total_june = pd.DataFrame(bqclient.query(query_string_5).result().to_dataframe())
 user_purchases_total_june.to_csv(data_folder/'user_purchases_total_june.csv')
 
 
