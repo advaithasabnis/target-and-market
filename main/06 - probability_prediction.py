@@ -8,8 +8,10 @@ Train and predict probability, for each user, that they are like a paid user usi
 Output probability predictions for front-end dashboard.
 """
 
+import shap
 import pandas as pd
 import xgboost as xgb
+import seaborn as sns
 from sklearn.metrics import roc_auc_score, precision_recall_curve, auc
 
 from targetandmarket.config import data_folder, appData_folder
@@ -26,7 +28,10 @@ def auprc(y_true, y_score):
 #%% Import and prepare data
 user_data = pd.read_csv(data_folder/'user_analytics.csv', index_col=0)
 
-X = user_data.drop(['user_id', 'sessions', 'total_time', 'isPro'], axis=1).copy()
+# Features selected during feature selection
+selected_features = ['holdings', 'avg_session', 'last_session', 'active_days', 'numberOfTransactions']
+
+X = user_data[selected_features].copy()
 y = user_data['isPro'].copy()
 
 #%% Training model on full dataset
@@ -43,3 +48,14 @@ print(f'AUPRC: {auprc(y, y_score):0.3f}')
 user_predictions = user_data.copy()
 user_predictions.loc[:, 'prediction'] = y_score
 user_predictions.to_csv(appData_folder/'user_predictions.csv')
+
+#%% Feature importance
+importances = xgb_classifier.feature_importances_
+imp = pd.DataFrame({'feature': X.columns, 'importance': importances})
+imp = imp.sort_values(by='importance', ascending=False)
+sns.barplot(x='importance', y='feature', data=imp, orient='h', palette='Blues_r');
+
+#%% Shap explainer
+explainer = shap.TreeExplainer(xgb_classifier)
+shap_values = explainer.shap_values(X)
+shap.summary_plot(shap_values, X)
