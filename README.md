@@ -9,7 +9,7 @@
   <h3 align="center">Target and Market</h3></p>
 
   <p align="center">
-    A Propensity Modelling Project
+    A Lead Scoring Project
     <br />
     by Advait Hasabnis
     <br />
