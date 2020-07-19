@@ -64,9 +64,6 @@ class ClfEstimator(BaseEstimator):
         check_is_fitted(self.estimator)
         return self.estimator.predict_proba(X)
 
-    def score(self, X, y):
-        return self.estimator.score(X, y)
-
 
 def auprc(y_true, y_score):
     '''Custom scoring function: area under precision recall curve'''
