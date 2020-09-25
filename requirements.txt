@@ -14,5 +14,5 @@ scikit-learn==0.23.1
 seaborn==0.10.1
 # Custom lightweight python package for project configuration files
 -e git+https://github.com/advaithasabnis/insight.git@338723223fd710dc0089425bc72db8230fb2d79e#egg=target_market_advait&subdirectory=targetandmarket
-tensorflow==2.2.0
+tensorflow==2.2.1
 xgboost==1.0.2
